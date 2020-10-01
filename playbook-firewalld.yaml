@@ -1,0 +1,20 @@
+-
+  name: install pre-requisites
+  hosts: all
+  become: yes
+  tasks:
+    - name: install firewalld
+      yum:
+        name:
+          - firewalld
+        state: present
+
+    - name: start firewalld
+      service:
+        name: firewalld
+        state: started
+    - name: enable firewalld
+      systemd:
+        name: firewalld
+        enabled: yes
+        state: started

@@ -1,0 +1,54 @@
+-
+  name: Deploy and configure database
+  hosts: dbserver
+  become: yes
+  tasks:
+    - name: Install pip
+      shell: curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py; python get-pip.py --user
+
+    - name : install mariadb-server
+      yum:
+        name: mariadb-server
+        state: present
+
+    - name: pip install pymysql module
+      pip:
+        name: pymysql
+    - name: start mariadb service
+      service:
+          name: mariadb
+          state: started
+    - name: enable mariadb service
+      service:
+        name: mariadb
+        enabled: yes
+    - name: configure firewall for db
+      firewalld:
+        port: 3306/tcp
+        zone: public
+        permanent: yes
+        state: enabled
+    - name: reload service firewalld
+      systemd:
+        name: firewalld
+        state: reloaded
+    - name: create a new db
+      mysql_db:
+        name: ecomdb
+        state: present
+    - name: create db user
+      mysql_user:
+        name: ecomuser@10.0.0.69
+        password: ecompassword
+        priv: '*.*:All'
+        state: present
+    - name: Load DB script
+      copy:
+        src: /home/osboxes/ansible-test-exercises/lamp-project/db-load-script.sql
+        dest: /tmp
+    - name: Restore database
+      mysql_db:
+        name: ecomdb
+        state: import
+        target: /tmp/db-load-script.sql
+      when: db_created.changed

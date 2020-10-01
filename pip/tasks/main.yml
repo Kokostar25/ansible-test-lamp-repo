@@ -1,0 +1,10 @@
+---
+ - name: install epel-release package
+   yum_repository:
+      name: epel-release
+      description: epel-release
+      baseurl: https://dl.fedoraproject.org/pub/epel/7/x86_64/
+      gpgcheck: no
+      gpgkey: https://getfedora.org/static/352C64E5.txt
+      enabled: yes
+      state: present
